@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram-like Chat App</title>
+    <style>
+        /* 스타일 시트 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #c7ceb6;
+        }
+
+        #chat-container {
+            /* 채팅 컨테이너 스타일 */
+            width: 80%;
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+
+        #chat-messages {
+            /* 채팅 메시지 영역 스타일 */
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .message {
+            /* 채팅 메시지 스타일 */
+            position: relative;
+            margin-bottom: 15px;
+            z-index: 2;
+            /* 더 상위 레이어로 올리기 */
+        }
+
+        .message .bubble {
+            /* 메시지 말풍선 스타일 */
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            max-width: 70%;
+            width: auto;
+            word-wrap: break-word;
+            opacity: 1;
+            transition: opacity 1s ease;
+            z-index: 1;
+            /* 뒷배경 보다 한 레이어 앞으로 올리기 */
+        }
+
+        #message-input-container {
+            /* 메시지 입력 컨테이너 스타일 */
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - 20px);
+            margin-top: 10px;
+            border-top: 1px solid #ddd;
+            background-color: #ffffff;
+        }
+
+        #color-buttons {
+            /* 메시지 입력 컨테이너 내 색상 선택 버튼 영역 스타일 */
+            display: flex;
+            flex-wrap: wrap;
+            align-self: flex-start;
+            margin-top: 10px;
+            margin-left: 5px;
+        }
+
+        .color-button {
+            /* 색상 선택 버튼 스타일 */
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            transition: transform 0.2s ease-in-out;
+            border: 2px solid #ccc;
+        }
+
+        .color-button:hover {
+            transform: scale(1.2);
+            border: 2px solid #888;
+        }
+
+        #input-and-button-container {
+            /* 메시지 입력과 전송 버튼 컨테이너 스타일 */
+            display: flex;
+            align-items: center;
+        }
+
+        #message-input {
+            /* 메시지 입력 필드 스타일 */
+            flex: 1;
+            padding: 10px;
+            box-sizing: border-box;
+            border: none;
+        }
+
+        #send-button {
+            /* 전송 버튼 스타일 */
+            width: 40px;
+            height: 40px;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #0095f6;
+            color: #fff;
+            cursor: pointer;
+            margin-left: 5px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            border: 2px solid #69696957;
+        }
+
+        #send-button:hover {
+            transform: scale(1.2);
+            border: 2px solid #2b2b2b33;
+        }
+
+        #drag-handle {
+            /* 드래그 핸들 스타일 */
+            cursor: grab;
+            height: 20px;
+            background-color: #ddd;
+            width: 100%;
+            opacity: 0;
+            /* 투명하게 만들기 */
+            z-index: 2;
+            /* 채팅 메시지 위에 위치 */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chat-container">
+        <div id="chat-messages"></div>
+        <div id="message-input-container">
+            <div id="color-buttons">
+                <!-- 색상 선택 버튼들 -->
+                <div class="color-button" style="background-color: #4CAF50;" onclick="changeBubbleColor('#4CAF50')">
+                </div>
+                <div class="color-button" style="background-color: #2196F3;" onclick="changeBubbleColor('#2196F3')">
+                </div>
+                <div class="color-button" style="background-color: #FF9800;" onclick="changeBubbleColor('#FF9800')">
+                </div>
+                <div class="color-button" style="background-color: #FF5722;" onclick="changeBubbleColor('#FF5722')">
+                </div>
+                <div class="color-button" style="background-color: #9C27B0;" onclick="changeBubbleColor('#9C27B0')">
+                </div>
+                <div class="color-button" style="background-color: #607D8B;" onclick="changeBubbleColor('#607D8B')">
+                </div>
+                <div class="color-button" style="background-color: #E91E63;" onclick="changeBubbleColor('#E91E63')">
+                </div>
+                <div class="color-button" style="background-color: #00BCD4;" onclick="changeBubbleColor('#00BCD4')">
+                </div>
+                <div class="color-button" style="background-color: #FFC107;" onclick="changeBubbleColor('#FFC107')">
+                </div>
+                <div class="color-button" style="background-color: #795548;" onclick="changeBubbleColor('#795548')">
+                </div>
+                <div class="color-button" style="background-color: #8BC34A;" onclick="changeBubbleColor('#8BC34A')">
+                </div>
+                <div class="color-button" style="background-color: #FFFFFF;" onclick="changeBubbleColor('#FFFFFF')">
+                </div>
+            </div>
+            <div id="input-and-button-container">
+                <!-- 메시지 입력 필드와 전송 버튼 -->
+                <input type="text" id="message-input" placeholder="Type your message...">
+                <button id="send-button" onclick="sendMessage()">
+                    <svg class="send-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M2 21l21-9L2 3v10l15 2-15 2z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 외부 라이브러리 및 스크립트 로드 -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // 소켓 연결 설정
+            const socket = io();
+            const chatMessages = document.getElementById("chat-messages");
+
+            // 드래그 핸들링 이벤트 설정
+            chatMessages.addEventListener("mousedown", function (event) {
+                const targetElement = event.target;
+
+                // 말풍선 클릭 여부 확인
+                if (!targetElement.classList.contains("bubble")) {
+                    isDragging = true;
+                    startDragX = event.clientX;
+                }
+            });
+
+            chatMessages.addEventListener("mousemove", function (event) {
+                if (isDragging) {
+                    endDragX = event.clientX;
+                }
+            });
+
+            chatMessages.addEventListener("mouseup", function () {
+                if (isDragging) {
+                    const dragDistance = endDragX - startDragX;
+
+                    if (dragDistance > 50) {
+                        redirectToPreviousRoom();
+                    } else if (dragDistance < -50) {
+                        redirectToNextRoom();
+                    }
+
+                    isDragging = false;
+                    startDragX = 0;
+                    endDragX = 0;
+                }
+            });
+
+            // 기타 필요한 변수 및 이벤트 핸들러 설정
+            const messageInput = document.getElementById("message-input");
+            const sendButton = document.getElementById("send-button");
+            const colorButtons = document.querySelectorAll(".color-button");
+
+            let currentBubbleColor = "#fff"; // 기본 버블 색상
+
+            let isDragging = false;
+            let startDragX = 0;
+            let endDragX = 0;
+
+
+            // 소켓 이벤트 핸들러 등록
+            function joinRoom(room) {
+                socket.emit('join room', room);
+            }
+
+            function sendMessage() {
+                const messageText = messageInput.value.trim();
+                if (messageText !== "") {
+                    const room = window.location.pathname.substring(1);
+                    socket.emit('chat message', { room: room, msg: { text: messageText, color: currentBubbleColor } });
+                    messageInput.value = "";
+                }
+            }
+
+            joinRoom(window.location.pathname.substring(1));
+
+            sendButton.addEventListener("click", sendMessage);
+
+            function changeBubbleColor(color) {
+                currentBubbleColor = color;
+                //document.getElementById("message-input").style.backgroundColor = color;
+                document.getElementById("send-button").style.backgroundColor = color;
+                document.getElementById("chat-container").style.backgroundColor = color;
+            }
+
+            function appendMessage(sender, text, fromYou, color, timestamp) {
+                // 메시지 추가 및 애니메이션 처리
+                const messageElement = document.createElement("div");
+                messageElement.classList.add("message", fromYou ? "from-you" : "from-others");
+
+                const bubbleElement = document.createElement("div");
+                bubbleElement.classList.add("bubble");
+                bubbleElement.textContent = text;
+                bubbleElement.style.backgroundColor = color;
+
+                messageElement.appendChild(bubbleElement);
+
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                const currentTime = new Date();
+                const elapsedTime = currentTime - new Date(timestamp);
+                let opacity = 1 - elapsedTime / 60000;
+
+                if (opacity > 0) {
+                    bubbleElement.style.opacity = opacity;
+
+                    function updateOpacity() {
+                        const currentTime = new Date();
+                        const elapsedTime = currentTime - new Date(timestamp);
+                        if (elapsedTime < 60000) {
+                            opacity = 1 - elapsedTime / 60000;
+                            bubbleElement.style.opacity = opacity;
+                            requestAnimationFrame(updateOpacity);
+                        } else {
+                            messageElement.remove();
+                        }
+                    }
+
+                    requestAnimationFrame(updateOpacity);
+                } else {
+                    messageElement.remove();
+                }
+            }
+
+            // 이전 메시지 및 실시간 메시지 처리
+            socket.on('previous messages', function (previousMessages) {
+                previousMessages.forEach(function (msg) {
+                    appendMessage("User", msg.text, false, msg.color, msg.timestamp);
+                });
+            });
+
+            socket.on('chat message', function (msg) {
+                appendMessage("You", msg.text, true, msg.color, msg.timestamp);
+            });
+
+            // 전송 버튼 및 엔터 키 이벤트 처리
+            sendButton.addEventListener("click", sendMessage);
+
+            messageInput.addEventListener("keyup", function (event) {
+                if (event.key === "Enter") {
+                    sendMessage();
+                }
+            });
+
+            // 색상 선택 버튼 클릭 이벤트 처리
+            colorButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    const color = this.style.backgroundColor;
+                    changeBubbleColor(color);
+                });
+            });
+
+            function redirectToPreviousRoom() {
+                const currentRoom = window.location.pathname.substring(1);
+                const previousRoom = parseInt(currentRoom) - 1;
+                window.location.href = `/${previousRoom}`;
+            }
+
+            function redirectToNextRoom() {
+                const currentRoom = window.location.pathname.substring(1);
+                const nextRoom = parseInt(currentRoom) + 1;
+                window.location.href = `/${nextRoom}`;
+            }
+
+            const prevRoomButton = document.getElementById("prev-room-button");
+            const nextRoomButton = document.getElementById("next-room-button");
+
+            prevRoomButton.addEventListener("click", redirectToPreviousRoom);
+            nextRoomButton.addEventListener("click", redirectToNextRoom);
+        });
+    </script>
+</body>
+
+</html>
